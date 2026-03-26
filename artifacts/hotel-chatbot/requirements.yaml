@@ -1,0 +1,17 @@
+packages:
+  "framer-motion": "For premium smooth animations and transitions"
+  "clsx": "For conditional class merging"
+  "tailwind-merge": "For safe tailwind class merging"
+  "date-fns": "For formatting timestamps"
+
+images:
+  - path: "artifacts/hotel-chatbot/public/images/hotel-bg.png"
+    description: "Dark, moody, luxury hotel lobby with glowing warm gold and amber lighting, modern elegant interior design, cinematic lighting, ultra high quality"
+    aspect_ratio: "16:9"
+  - path: "artifacts/hotel-chatbot/public/images/concierge-avatar.png"
+    description: "Minimalist elegant gold geometric abstract logo mark of a luxury hotel, dark background"
+    aspect_ratio: "1:1"
+
+notes:
+  - Streaming uses Server-Sent Events via custom fetch reading the ReadableStream
+  - Assumes standard API response shapes from the generated orval client
