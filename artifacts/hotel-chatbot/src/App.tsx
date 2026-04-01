@@ -4,9 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
-import { useAuth } from "@workspace/replit-auth-web";
+
 import NotFound from "@/pages/not-found";
-import LoginPage from "@/pages/login";
 
 import { AppLayout } from "@/components/layout/app-layout";
 import WelcomePage from "@/pages/welcome";
