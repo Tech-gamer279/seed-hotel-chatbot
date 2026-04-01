@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Plus, MessageSquare, Trash2, X, Menu, Hotel, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@workspace/replit-auth-web";
+// import { useAuth } from "@workspace/replit-auth-web";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
   useListOpenaiConversations, 
@@ -18,9 +18,10 @@ export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [location, setLocation] = useLocation();
   const queryClient = useQueryClient();
-  const { user, logout } = useAuth();
 
-  const { data: conversations = [], isLoading } = useListOpenaiConversations();
+
+  const { data, isLoading } = useListOpenaiConversations();
+  const conversations = Array.isArray(data) ? data : [];
   const { mutate: createConv, isPending: isCreating } = useCreateOpenaiConversation();
   const { mutate: deleteConv } = useDeleteOpenaiConversation();
 
