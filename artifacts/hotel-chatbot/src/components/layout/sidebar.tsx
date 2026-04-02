@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Plus, MessageSquare, Trash2, X, Menu, Hotel, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-// import { useAuth } from "@workspace/replit-auth-web";
+import { useAuth } from "@workspace/replit-auth-web";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
   useListOpenaiConversations, 
@@ -18,6 +18,7 @@ export function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [location, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const { user, logout } = useAuth();
 
 
   const { data, isLoading } = useListOpenaiConversations();
@@ -57,7 +58,7 @@ export function Sidebar() {
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-card border-r border-border">
       <div className="p-4 flex flex-col gap-4">
-        <Link href="/" onClick={() => setIsOpen(false)}>
+        <button onClick={() => { console.log('Sidebar Home Clicked'); setLocation("/"); setIsOpen(false); }} className="w-full text-left">
           <div className="flex items-center gap-3 cursor-pointer group">
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:border-primary/40 transition-colors">
               <Hotel className="w-4 h-4 text-primary" />
@@ -67,7 +68,7 @@ export function Sidebar() {
               <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Concierge</span>
             </div>
           </div>
-        </Link>
+        </button>
 
         <LuxuryButton 
           className="w-full justify-start gap-2" 
@@ -96,32 +97,39 @@ export function Sidebar() {
             conversations.map((conv) => {
               const isActive = location === `/c/${conv.id}`;
               return (
-                <Link key={conv.id} href={`/c/${conv.id}`} onClick={() => setIsOpen(false)}>
-                  <div className={cn(
-                    "group flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200",
-                    isActive 
-                      ? "bg-primary/10 text-primary" 
-                      : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
-                  )}>
-                    <div className="flex items-center gap-3 overflow-hidden">
-                      <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-                      <div className="flex flex-col truncate">
-                        <span className="text-sm truncate font-medium">
-                          {conv.title}
-                        </span>
-                        <span className="text-[10px] opacity-60 mt-0.5">
-                          {format(new Date(conv.createdAt), "MMM d, h:mm a")}
-                        </span>
+                <>
+                  <div
+                    key={conv.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => { console.log('Sidebar Conversation Clicked', conv.id); setLocation(`/c/${conv.id}`); setIsOpen(false); }}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { setLocation(`/c/${conv.id}`); setIsOpen(false); } }}
+                    className={cn(
+                      "group flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-200",
+                      isActive 
+                        ? "bg-primary/10 text-primary" 
+                        : "hover:bg-accent/50 text-muted-foreground hover:text-foreground"
+                    )}>
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                        <div className="flex flex-col truncate">
+                          <span className="text-sm truncate font-medium">
+                            {conv.title}
+                          </span>
+                          <span className="text-[10px] opacity-60 mt-0.5">
+                            {format(new Date(conv.createdAt), "MMM d, h:mm a")}
+                          </span>
+                        </div>
                       </div>
+                      <button 
+                        onClick={(e) => handleDelete(e, conv.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-destructive/20 hover:text-destructive rounded-md transition-all shrink-0"
+                        tabIndex={-1}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                    <button 
-                      onClick={(e) => handleDelete(e, conv.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-destructive/20 hover:text-destructive rounded-md transition-all shrink-0"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </Link>
+                </>
               );
             })
           )}
