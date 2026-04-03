@@ -3,6 +3,7 @@ import { Sparkles, ArrowRight, MapPin, Coffee, Car, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCreateOpenaiConversation, getListOpenaiConversationsQueryKey } from "@workspace/api-client-react";
+import { useEffect } from "react";
 
 const suggestions = [
   { label: "Recommend local restaurants", icon: MapPin },
@@ -33,16 +34,34 @@ export default function WelcomePage() {
   const queryClient = useQueryClient();
   const { mutate: createConv, isPending } = useCreateOpenaiConversation();
 
+  useEffect(() => {
+    console.log("WelcomePage mounted");
+  }, []);
+
   const handleStart = (suggestion?: string) => {
+    console.log("handleStart called with suggestion:", suggestion);
     createConv(
       { data: { title: suggestion || "New Request" } },
       {
         onSuccess: (newConv) => {
+          console.log("Conversation created successfully:", newConv);
+          if (!newConv?.id) {
+            console.error("No ID in response:", newConv);
+            alert("Error creating conversation - no ID");
+            return;
+          }
+          console.log("Invalidating conversation query...");
           queryClient.invalidateQueries({ queryKey: getListOpenaiConversationsQueryKey() });
           const path = suggestion
             ? `/c/${newConv.id}?init=${encodeURIComponent(suggestion)}`
             : `/c/${newConv.id}`;
+          console.log("Navigating to:", path);
           setLocation(path);
+          console.log("Navigation called");
+        },
+        onError: (error) => {
+          console.error("Failed to create conversation:", error);
+          alert("Error creating conversation: " + (error as any)?.message || "Unknown error");
         },
       }
     );

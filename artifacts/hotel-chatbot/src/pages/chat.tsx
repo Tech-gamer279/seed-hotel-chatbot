@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useParams, useSearch } from "wouter";
+import { useParams, useSearch, useLocation } from "wouter";
 import { Send, Sparkles, Hotel, ArrowDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGetOpenaiConversation, useListOpenaiMessages } from "@workspace/api-client-react";
@@ -10,6 +10,7 @@ import { LuxuryButton } from "@/components/ui/luxury-button";
 export default function ChatPage() {
   const { id } = useParams();
   const search = useSearch();
+  const [, setLocation] = useLocation();
   const conversationId = id ? parseInt(id, 10) : undefined;
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -18,14 +19,24 @@ export default function ChatPage() {
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const autoSentRef = useRef(false);
 
-  const { data: conversation, isLoading: isConvLoading } = useGetOpenaiConversation(
+  // Debug logging
+  useEffect(() => {
+    console.log("ChatPage mounted/updated:", { id, conversationId, search });
+  }, [id, conversationId, search]);
+
+  // Delay fetching to ensure conversation exists in DB
+  const { data: conversation, isLoading: isConvLoading, isError: isConvError, error: convError } = useGetOpenaiConversation(
     conversationId as number,
-    { query: { enabled: !!conversationId } }
+    { query: { enabled: !!conversationId, staleTime: Infinity, retry: 3 } }
   );
 
-  const { data: messages = [], isLoading: isMessagesLoading } = useListOpenaiMessages(
+  useEffect(() => {
+    console.log("Conversation query result:", { isConvLoading, isConvError, convError, conversation });
+  }, [conversation, isConvLoading, isConvError, convError]);
+
+  const { data: messages = [], isLoading: isMessagesLoading, isError: isMsgsError } = useListOpenaiMessages(
     conversationId as number,
-    { query: { enabled: !!conversationId } }
+    { query: { enabled: !!conversationId && !isConvError, staleTime: Infinity, retry: 3 } }
   );
 
   const { sendMessage, isStreaming, streamedContent, optimisticUserMessage } =
@@ -90,6 +101,28 @@ export default function ChatPage() {
           <Sparkles className="w-7 h-7 text-primary/50" />
         </motion.div>
         <p className="text-muted-foreground text-sm tracking-wide">Preparing your concierge…</p>
+      </div>
+    );
+  }
+
+  if (isConvError) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-4">
+        <p className="text-red-500">Failed to load conversation</p>
+        <button onClick={() => setLocation("/")} className="px-4 py-2 bg-primary text-white rounded">
+          Go Back Home
+        </button>
+      </div>
+    );
+  }
+
+  if (!conversation) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Conversation not found</p>
+        <button onClick={() => setLocation("/")} className="px-4 py-2 bg-primary text-white rounded">
+          Go Back Home
+        </button>
       </div>
     );
   }
