@@ -1,12 +1,12 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
 import authRouter from "./auth";
-import openaiConversationsRouter from "./openai/conversations";
+import openaiRouter from "./openai";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(authRouter);
-router.use("/openai", openaiConversationsRouter);
+router.use("/openai", openaiRouter);
 
 export default router;

@@ -30,7 +30,7 @@ You help guests with:
 
 Always be warm, modern, and attentive. Keep a friendly yet refined tone. If you don't know specific details, offer to connect them with the appropriate department.`;
 
-router.get("/conversations", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const convs = await db
       .select()
@@ -43,7 +43,7 @@ router.get("/conversations", async (req, res) => {
   }
 });
 
-router.post("/conversations", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const body = CreateOpenaiConversationBody.parse(req.body);
     const [conv] = await db
@@ -57,7 +57,7 @@ router.post("/conversations", async (req, res) => {
   }
 });
 
-router.get("/conversations/:id", async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
     const { id } = GetOpenaiConversationParams.parse({
       id: Number(req.params.id),
@@ -85,7 +85,7 @@ router.get("/conversations/:id", async (req, res) => {
   }
 });
 
-router.delete("/conversations/:id", async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     const { id } = DeleteOpenaiConversationParams.parse({
       id: Number(req.params.id),
@@ -105,7 +105,7 @@ router.delete("/conversations/:id", async (req, res) => {
   }
 });
 
-router.get("/conversations/:id/messages", async (req, res) => {
+router.get("/:id/messages", async (req, res) => {
   try {
     const { id } = ListOpenaiMessagesParams.parse({
       id: Number(req.params.id),
@@ -122,7 +122,7 @@ router.get("/conversations/:id/messages", async (req, res) => {
   }
 });
 
-router.post("/conversations/:id/messages", async (req, res) => {
+router.post("/:id/messages", async (req, res) => {
   try {
     const { id } = SendOpenaiMessageParams.parse({
       id: Number(req.params.id),
